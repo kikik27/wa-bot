@@ -1,6 +1,6 @@
 const { Client, LocalAuth } = require('whatsapp-web.js');
 const qrcode = require('qrcode-terminal');
-const {bot, teleReciver} = require('./telegram');
+const { bot, teleReciver }= require('./telegram');
 
 let client;
 
@@ -24,7 +24,7 @@ function createClient() {
   client.on('qr', (qr) => {
     qrcode.generate(qr, { small: true });
     console.log(teleReciver);
-    bot.sendMessage(teleReciver, "Please SCAN QR CDEO!");
+    bot.sendMessage(teleReciver, "Please SCAN QR_CODE");
   });
 
   client.on('message', (msg) => {
@@ -47,12 +47,7 @@ function createClient() {
 
   client.on('ready', async () => {
     console.log('READY');
-    const debugWWebVersion = await client.getWWebVersion();
-    console.log(`WWebVersion = ${debugWWebVersion}`);
-
-    client.pupPage.on('pageerror', function (err) {
-      console.log('Page error: ' + err.toString());
-    });
+    bot.sendMessage(teleReciver, "Device is ready!");
     client.pupPage.on('error', function (err) {
       console.log('Page error: ' + err.toString());
     });
