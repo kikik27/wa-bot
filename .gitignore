@@ -71,3 +71,6 @@ typings/
 
 # Serverless directories
 .serverless
+
+.wwebjs_auth/
+.wwebjs_cache/

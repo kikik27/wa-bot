@@ -1,0 +1,106 @@
+# Production Docker Compose for Linux VPS
+version: '3.8'
+
+services:
+  # Main wa-bot application
+  wa-bot:
+    build:
+      context: .
+      dockerfile: DockerFile
+    container_name: wa-bot-app
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=production
+      - PORT=5000
+      - WA_SESSION_NAME=wa-bot-production
+    volumes:
+      - wa-sessions:/usr/src/app/.wwebjs_auth
+      - app-logs:/usr/src/app/logs
+    networks:
+      - wa-bot-network
+    # Security for Chrome/Puppeteer
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_ADMIN
+    depends_on:
+      - redis
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:5000/" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Nginx reverse proxy
+  nginx:
+    image: nginx:alpine
+    container_name: wa-bot-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - nginx-logs:/var/log/nginx
+    depends_on:
+      - wa-bot
+    networks:
+      - wa-bot-network
+    healthcheck:
+      test: [ "CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/health" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis for session storage (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: wa-bot-redis
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    networks:
+      - wa-bot-network
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-defaultpass}
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Watchtower for auto-updates (optional)
+  watchtower:
+    image: containrrr/watchtower
+    container_name: wa-bot-watchtower
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: --cleanup --interval 3600
+    environment:
+      - WATCHTOWER_NOTIFICATIONS=email
+      - WATCHTOWER_NOTIFICATION_EMAIL_FROM=${EMAIL_FROM}
+      - WATCHTOWER_NOTIFICATION_EMAIL_TO=${EMAIL_TO}
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER=${EMAIL_SERVER}
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PORT=${EMAIL_PORT:-587}
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_USER=${EMAIL_USER}
+      - WATCHTOWER_NOTIFICATION_EMAIL_SERVER_PASSWORD=${EMAIL_PASSWORD}
+
+networks:
+  wa-bot-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
+
+volumes:
+  wa-sessions:
+    driver: local
+  app-logs:
+    driver: local
+  nginx-logs:
+    driver: local
+  redis-data:
+    driver: local

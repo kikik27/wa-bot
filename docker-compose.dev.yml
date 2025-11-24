@@ -1,0 +1,50 @@
+# Development Docker Compose
+version: '3.8'
+
+services:
+  # wa-bot application in development
+  wa-bot-dev:
+    build:
+      context: .
+      dockerfile: DockerFile
+      target: development
+    container_name: wa-bot-dev
+    restart: unless-stopped
+    environment:
+      - NODE_ENV=development
+      - PORT=5000
+    volumes:
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
+      - wa-sessions-dev:/usr/src/app/.wwebjs_auth
+    ports:
+      - "5000:5000"
+    networks:
+      - wa-bot-dev-network
+    security_opt:
+      - seccomp:unconfined
+    cap_add:
+      - SYS_ADMIN
+    command: npm run dev
+
+  # Nginx for development
+  nginx-dev:
+    image: nginx:alpine
+    container_name: wa-bot-nginx-dev
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.dev.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - wa-bot-dev
+    networks:
+      - wa-bot-dev-network
+
+networks:
+  wa-bot-dev-network:
+    driver: bridge
+
+volumes:
+  wa-sessions-dev:
+    driver: local
