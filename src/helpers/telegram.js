@@ -1,7 +1,13 @@
 const TelegramBot = require('node-telegram-bot-api');
-const token = process.env.TELE_TOKEN ?? "7748465738:AAH_BJIQ2UvNq7n-V1s-U2XYfiGMMPJKCeM";
+const token = process.env.TELE_TOKEN
+const teleReciver = process.env.TELE_CHAT_RECIVER;
+if (!token) {
+  throw new Error("TELEGRAM_TOKEN is not defined")
+}
+if (!teleReciver) {
+  throw new Error("TELEGRAM_RECIVER is not defined")
+}
 const bot = new TelegramBot(token, { polling: true });
-const teleReciver = process.env.TELE_CHAT_RECIVER ?? 6228179193;
 bot.sendMessage(teleReciver, "Service is Runnning");
 
 module.exports = { bot, teleReciver }
