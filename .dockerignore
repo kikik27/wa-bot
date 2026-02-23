@@ -1,0 +1,96 @@
+# Docker ignore patterns
+node_modules
+npm-debug.log
+.git
+.gitignore
+README.md
+.env
+.env.*
+.nyc_output
+coverage
+.eslintcache
+
+# Logs
+logs
+*.log
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
+
+# Dependency directories
+node_modules/
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# WhatsApp session data (will be handled by Docker volume)
+.wwebjs_auth/
+.wwebjs_cache/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Docker files (exclude from build context)
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+docs/
+*.md
+
+# Test files
+test/
+tests/
+__tests__/
+
+# Build artifacts
+dist/
+build/
+
+# Temporary files
+tmp/
+temp/
+
+# SSL certificates (handled separately)
+ssl/
+*.pem
+*.key
+*.crt
+
+# Nginx config (handled separately)
+nginx/
+
+# Backup files
+*.backup
+*.bak
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
